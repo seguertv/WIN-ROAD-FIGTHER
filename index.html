@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WIN Road Fighter - Edición Arcade & Audio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      image-rendering: pixelated;
+    }
+
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .arcade-wrapper {
+      width: 1000px;
+      height: 900px;
+      background: url('background.png') no-repeat center center;
+      background-size: 100% 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* --- PISTA CENTRAL ANIMADA --- */
+    .animated-track-container {
+      position: absolute;
+      top: 68px;
+      left: 332px;
+      width: 336px;
+      height: 772px;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .moving-road {
+      position: absolute;
+      width: 100%;
+      height: 200%;
+      top: -100%;
+      background-color: #3b3b42;
+      background-image: repeating-linear-gradient(to bottom, #ffffff 0px, #ffffff 20px, transparent 20px, transparent 40px);
+      background-position: center center;
+      background-size: 4px 40px;
+      background-repeat: repeat-y;
+      animation: roadMove 0.8s linear infinite;
+    }
+
+    @keyframes roadMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(40px); }
+    }
+
+    /* BANNERS DE LA PISTA */
+    .track-banner-middle {
+      position: absolute;
+      top: 385px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      height: 46px;
+      background: #000;
+      border: 3px solid #ffcc00;
+      border-radius: 6px;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .track-banner-middle .title { font-size: 8px; color: #fff; }
+    .track-banner-middle .sub { font-size: 8px; color: #00e5ff; margin-top: 3px; }
+
+    .track-label-lap1 {
+      position: absolute;
+      top: 348px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      color: #fff;
+      z-index: 2;
+      text-shadow: 2px 2px #000;
+    }
+
+    /* --- LISTA DE RANKING IZQUIERDA --- */
+    .ranking-overlay {
+      position: absolute;
+      top: 130px;
+      left: 20px;
+      width: 210px;
+      height: 330px;
+      background-color: #000;
+      z-index: 5;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 8px;
+      padding: 4px;
+    }
+    .ranking-overlay::-webkit-scrollbar { width: 3px; }
+    .ranking-overlay::-webkit-scrollbar-thumb { background: #ffcc00; }
+
+    .rank-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .rank-row .name-box {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      max-width: 120px;
+    }
+    .rank-row .name {
+      text-transform: uppercase;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    .rank-info {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* LOGO BANDERA LAP */
+    .lap-badge {
+      font-size: 6px;
+      padding: 1px 3px;
+      border-radius: 2px;
+      border: 1px solid #fff;
+      background: #222;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+    }
+    .lap-badge.lap1 { border-color: #ffcc00; color: #ffcc00; }
+    .lap-badge.lap2 { border-color: #00ff66; color: #00ff66; }
+
+    .medal { font-size: 9px; }
+    .rank-row.top-1 { color: #ffcc00; font-weight: bold; }
+    .rank-row.top-2 { color: #00e5ff; font-weight: bold; }
+    .rank-row.top-3 { color: #ff5500; font-weight: bold; }
+
+    /* --- CAJONES DERECHOS --- */
+    .metric-val-overlay {
+      position: absolute;
+      width: 175px;
+      height: 30px;
+      background: #000;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffcc00;
+      font-size: 22px;
+    }
+    #val-cuota-box { top: 145px; right: 35px; }
+    #val-total-box { top: 262px; right: 35px; }
+
+    .clock-overlay {
+      position: absolute;
+      top: 365px;
+      right: 35px;
+      width: 175px;
+      height: 25px;
+      background: #000;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffcc00;
+      font-size: 13px;
+    }
+
+    /* --- CAPA DE SPRITES DE AUTOS (AUTOS MÁS GRANDES) --- */
+    .track-overlay {
+      position: absolute;
+      top: 68px;
+      left: 332px;
+      width: 336px;
+      height: 772px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .car-sprite-item {
+      position: absolute;
+      width: 42px;        /* Autos más grandes */
+      height: 68px;       /* Autos más grandes */
+      transition: bottom 0.8s ease-in-out, left 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .car-sprite-item img {
+      width: 100%;
+      height: auto;
+    }
+
+    .car-tag {
+      position: absolute;
+      top: -14px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid #00e5ff;
+      color: #fff;
+      font-size: 6px;
+      padding: 1px 3px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    /* BARRA DE BOTONES INFERIORES */
+    .bottom-bar {
+      margin-top: 10px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .admin-btn-trigger, .audio-btn-trigger {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #000;
+      font-weight: bold;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .admin-btn-trigger { background: #ffcc00; }
+    .admin-btn-trigger:hover { background: #e6b800; }
+    .audio-btn-trigger { background: #00e5ff; }
+    .audio-btn-trigger:hover { background: #00b3cc; }
+
+    /* MODAL DE LOGIN Y ADMINISTRACIÓN */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-box {
+      background: #111;
+      border: 3px solid #ffcc00;
+      border-radius: 8px;
+      padding: 20px;
+      width: 480px;
+      max-width: 90%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      font-size: 9px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffcc00;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+    }
+
+    .close-btn {
+      background: #ff3333;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .admin-section {
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .admin-section h4 { color: #00e5ff; margin-bottom: 4px; }
+
+    input, select, button {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 6px;
+      background: #000;
+      color: #fff;
+      border: 1px solid #ffcc00;
+    }
+
+    .btn-action { background: #ff5500; cursor: pointer; border: none; }
+    .btn-action:hover { background: #e04b00; }
+    .btn-danger { background: #cc0000; }
+  </style>
+</head>
+<body>
+
+  <!-- CANCIÓN DE FONDO EN BUCLE CON ARCHIVO LOCAL musica.mp3 -->
+  <audio id="bgm-music" loop preload="auto">
+    <source src="musica.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="arcade-wrapper">
+    <!-- PISTA CENTRAL ANIMADA -->
+    <div class="animated-track-container">
+      <div class="moving-road"></div>
+      <div class="track-label-lap1">🏁 LAP 1</div>
+      <div class="track-banner-middle">
+        <div class="title">PRIMERA META</div>
+        <div class="sub">10 VENTAS</div>
+      </div>
+    </div>
+
+    <!-- LISTA DE RANKING IZQUIERDA -->
+    <div class="ranking-overlay" id="ranking-list"></div>
+
+    <!-- CAPA DE AUTOS SOBRE LA PISTA -->
+    <div class="track-overlay" id="track-layer"></div>
+
+    <!-- VALORES DINÁMICOS DERECHOS -->
+    <div class="metric-val-overlay" id="val-cuota-box">199</div>
+    <div class="metric-val-overlay" id="val-total-box"><span id="val-total">49</span></div>
+    <div class="clock-overlay" id="val-clock">17:48:54</div>
+  </div>
+
+  <!-- BOTONES INFERIORES -->
+  <div class="bottom-bar">
+    <button class="admin-btn-trigger" onclick="openAdminModal()">⚙️ PANEL ADMIN (SUPERVISOR)</button>
+    <button class="audio-btn-trigger" onclick="toggleAudio()" id="audio-toggle-btn">🔊 MÚSICA: ON</button>
+  </div>
+
+  <!-- MODAL DE ACCESO / CONTROL ADMIN -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-box">
+      
+      <!-- PANTALLA 1: LOGIN -->
+      <div id="loginForm" style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="modal-header">
+          <h3>ACCESO SUPERVISOR</h3>
+          <button class="close-btn" onclick="closeAdminModal()">X</button>
+        </div>
+        <label>USUARIO:</label>
+        <input type="text" id="adminUser" placeholder="admin">
+        <label>CONTRASEÑA:</label>
+        <input type="password" id="adminPass" placeholder="****">
+        <button class="btn-action" onclick="loginAdmin()" style="margin-top: 5px;">INGRESAR</button>
+        <p id="loginError" style="color: #ff3333; display: none;">Credenciales incorrectas</p>
+      </div>
+
+      <!-- PANTALLA 2: CONTROLES DE ADMINISTRACIÓN -->
+      <div id="adminControls" style="display: none; flex-direction: column; gap: 12px;">
+        <div class="modal-header">
+          <h3>MENÚ ADMINISTRADOR</h3>
+          <button class="close-btn" onclick="closeAdminModal()">X</button>
+        </div>
+
+        <!-- Modificar la cuota del mes -->
+        <div class="admin-section">
+          <h4>CUOTA DEL MES</h4>
+          <div style="display:flex; gap: 6px;">
+            <input type="number" id="inputCuota" style="width: 100px;">
+            <button class="btn-action" onclick="setCuota()">GUARDAR CUOTA</button>
+          </div>
+        </div>
+
+        <!-- Agregar Asesor con Asignación de Carro disponible -->
+        <div class="admin-section">
+          <h4>AGREGAR ASESOR Y AUTOS</h4>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <input type="text" id="newDriverName" placeholder="NOMBRE ASESOR">
+            <label>CARRO DISPONIBLE:</label>
+            <select id="availableCarsSelect"></select>
+            <button class="btn-action" onclick="addDriverAdmin()">+ AGREGAR ASESOR</button>
+          </div>
+        </div>
+
+        <!-- Modificar Ventas / Quitar Asesor -->
+        <div class="admin-section">
+          <h4>GESTIONAR ASESORES Y VENTAS</h4>
+          <label>SELECCIONAR ASESOR:</label>
+          <select id="driverManageSelect" onchange="loadDriverData()"></select>
+          
+          <div style="display:flex; gap: 6px; align-items:center;">
+            <label>VENTAS:</label>
+            <input type="number" id="editSalesInput" style="width: 70px;" min="0">
+            <button class="btn-action" onclick="updateSalesAdmin()">ACTUALIZAR</button>
+          </div>
+
+          <div style="display:flex; gap: 6px; margin-top: 5px;">
+            <label>CAMBIAR AUTO:</label>
+            <select id="availableCarsEditSelect"></select>
+            <button class="btn-action" onclick="changeCarAdmin()">CAMBIAR</button>
+          </div>
+
+          <button class="btn-action btn-danger" onclick="deleteDriverAdmin()" style="margin-top: 8px;">ELIMINAR ASESOR</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // CREDENCIALES
+    const ADMIN_USER = "admin";
+    const ADMIN_PASS = "1234";
+
+    let cuotaMes = 199;
+    let allCars = Array.from({length: 20}, (_, i) => `car-${i + 1}.png`);
+
+    let drivers = [
+      { id: 1,  name: "JESUS",    score: 11, sprite: "car-1.png" },
+      { id: 2,  name: "SALTET",   score: 8,  sprite: "car-2.png" },
+      { id: 3,  name: "LEONARDO", score: 7,  sprite: "car-3.png" },
+      { id: 4,  name: "MILAGROS", score: 7,  sprite: "car-4.png" },
+      { id: 5,  name: "PIERO",    score: 7,  sprite: "car-5.png" },
+      { id: 6,  name: "ADRIANO",  score: 5,  sprite: "car-6.png" },
+      { id: 7,  name: "ALONSO",   score: 4,  sprite: "car-7.png" },
+      { id: 8,  name: "VIOLETA",  score: 1,  sprite: "car-8.png" },
+      { id: 9,  name: "CARLOS",   score: 0,  sprite: "car-9.png" },
+      { id: 10, name: "MARIA",    score: 0,  sprite: "car-10.png" }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderAll();
+      setInterval(updateClock, 1000);
+
+      // Iniciar reproductor al primer clic del usuario (política de navegadores)
+      document.body.addEventListener('click', startMusicFirstTime, { once: true });
+    });
+
+    /* LÓGICA DE AUDIO */
+    const audioEl = document.getElementById('bgm-music');
+    let isPlaying = false;
+
+    function startMusicFirstTime() {
+      audioEl.play().then(() => {
+        isPlaying = true;
+        document.getElementById('audio-toggle-btn').textContent = "🔊 MÚSICA: ON";
+      }).catch(() => {});
+    }
+
+    function toggleAudio() {
+      if (isPlaying) {
+        audioEl.pause();
+        isPlaying = false;
+        document.getElementById('audio-toggle-btn').textContent = "🔈 MÚSICA: OFF";
+      } else {
+        audioEl.play();
+        isPlaying = true;
+        document.getElementById('audio-toggle-btn').textContent = "🔊 MÚSICA: ON";
+      }
+    }
+
+    function renderAll() {
+      drivers.sort((a, b) => b.score - a.score);
+      renderRanking();
+      renderCars();
+      updateStats();
+    }
+
+    function renderRanking() {
+      const list = document.getElementById('ranking-list');
+      list.innerHTML = '';
+
+      drivers.forEach((d, i) => {
+        let topClass = '';
+        let medalHtml = '';
+
+        if (i === 0) { topClass = 'top-1'; medalHtml = '<span class="medal">🥇</span>'; }
+        else if (i === 1) { topClass = 'top-2'; medalHtml = '<span class="medal">🥈</span>'; }
+        else if (i === 2) { topClass = 'top-3'; medalHtml = '<span class="medal">🥉</span>'; }
+
+        const lapClass = d.score >= 11 ? 'lap2' : 'lap1';
+        const lapText = d.score >= 11 ? '🏁L2' : '🏁L1';
+
+        const row = document.createElement('div');
+        row.className = `rank-row ${topClass}`;
+        row.innerHTML = `
+          <div class="name-box">
+            <span>${i + 1}.</span>
+            ${medalHtml}
+            <span class="name">${d.name}</span>
+          </div>
+          <div class="rank-info">
+            <span class="lap-badge ${lapClass}">${lapText}</span>
+            <span>(${d.score})</span>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function renderCars() {
+      const track = document.getElementById('track-layer');
+      track.innerHTML = '';
+
+      const lanes = [38, 112, 186, 260];
+
+      const lap2_minY = 30;  
+      const lap2_maxY = 320; 
+      const lap1_minY = 440; 
+      const lap1_maxY = 710; 
+
+      drivers.forEach((d, index) => {
+        let bottomY = 0;
+
+        if (d.score <= 10) {
+          const progress = d.score / 10;
+          bottomY = lap2_minY + (progress * (lap2_maxY - lap2_minY));
+        } else {
+          const progress = Math.min((d.score - 10) / 10, 1);
+          bottomY = lap1_minY + (progress * (lap1_maxY - lap1_minY));
+        }
+
+        const tieOffset = (index % 3) * 12;
+        bottomY = Math.max(10, bottomY - tieOffset);
+
+        const laneX = lanes[index % lanes.length];
+
+        const carDiv = document.createElement('div');
+        carDiv.className = 'car-sprite-item';
+        carDiv.style.left = laneX + 'px';
+        carDiv.style.bottom = bottomY + 'px';
+
+        carDiv.innerHTML = `
+          <div class="car-tag">${d.name}</div>
+          <img src="${d.sprite}" alt="${d.name}">
+        `;
+
+        track.appendChild(carDiv);
+      });
+    }
+
+    function updateStats() {
+      const total = drivers.reduce((s, d) => s + d.score, 0);
+      document.getElementById('val-total').textContent = total;
+      document.getElementById('val-cuota-box').textContent = cuotaMes;
+      updateClock();
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('val-clock').textContent = now.toTimeString().split(' ')[0];
+    }
+
+    /* LÓGICA DE ADMINISTRACIÓN */
+    function openAdminModal() {
+      document.getElementById('adminModal').style.display = 'flex';
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').style.display = 'none';
+      document.getElementById('loginError').style.display = 'none';
+    }
+
+    function loginAdmin() {
+      const u = document.getElementById('adminUser').value;
+      const p = document.getElementById('adminPass').value;
+
+      if (u === ADMIN_USER && p === ADMIN_PASS) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('adminControls').style.display = 'flex';
+        initAdminData();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    function initAdminData() {
+      document.getElementById('inputCuota').value = cuotaMes;
+      populateCarSelects();
+      populateDriverSelect();
+    }
+
+    function getAvailableCars() {
+      const usedCars = drivers.map(d => d.sprite);
+      return allCars.filter(car => !usedCars.includes(car));
+    }
+
+    function populateCarSelects() {
+      const available = getAvailableCars();
+      
+      const selAdd = document.getElementById('availableCarsSelect');
+      const selEdit = document.getElementById('availableCarsEditSelect');
+      selAdd.innerHTML = '';
+      selEdit.innerHTML = '';
+
+      available.forEach(car => {
+        const opt1 = document.createElement('option');
+        opt1.value = car; opt1.textContent = car;
+        selAdd.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = car; opt2.textContent = car;
+        selEdit.appendChild(opt2);
+      });
+    }
+
+    function populateDriverSelect() {
+      const sel = document.getElementById('driverManageSelect');
+      sel.innerHTML = '';
+      drivers.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = `${d.name} (${d.sprite})`;
+        sel.appendChild(opt);
+      });
+      loadDriverData();
+    }
+
+    function loadDriverData() {
+      const id = parseInt(document.getElementById('driverManageSelect').value);
+      const d = drivers.find(item => item.id === id);
+      if (d) {
+        document.getElementById('editSalesInput').value = d.score;
+      }
+    }
+
+    function setCuota() {
+      const val = parseInt(document.getElementById('inputCuota').value);
+      if (!isNaN(val) && val >= 0) {
+        cuotaMes = val;
+        renderAll();
+        alert("Cuota actualizada correctamente");
+      }
+    }
+
+    function addDriverAdmin() {
+      const name = document.getElementById('newDriverName').value.trim().toUpperCase();
+      const car = document.getElementById('availableCarsSelect').value;
+
+      if (!name) { alert("Ingresa un nombre"); return; }
+      if (!car) { alert("No hay autos disponibles"); return; }
+
+      drivers.push({
+        id: Date.now(),
+        name: name,
+        score: 0,
+        sprite: car
+      });
+
+      document.getElementById('newDriverName').value = '';
+      renderAll();
+      initAdminData();
+    }
+
+    function updateSalesAdmin() {
+      const id = parseInt(document.getElementById('driverManageSelect').value);
+      const val = parseInt(document.getElementById('editSalesInput').value);
+      const d = drivers.find(item => item.id === id);
+
+      if (d && !isNaN(val) && val >= 0) {
+        d.score = val;
+        renderAll();
+        populateDriverSelect();
+      }
+    }
+
+    function changeCarAdmin() {
+      const id = parseInt(document.getElementById('driverManageSelect').value);
+      const car = document.getElementById('availableCarsEditSelect').value;
+      const d = drivers.find(item => item.id === id);
+
+      if (d && car) {
+        d.sprite = car;
+        renderAll();
+        initAdminData();
+      }
+    }
+
+    function deleteDriverAdmin() {
+      const id = parseInt(document.getElementById('driverManageSelect').value);
+      if (confirm("¿Estás seguro de eliminar este asesor?")) {
+        drivers = drivers.filter(d => d.id !== id);
+        renderAll();
+        initAdminData();
+      }
+    }
+  </script>
+</body>
+</html>
